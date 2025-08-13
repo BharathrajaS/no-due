@@ -10,7 +10,7 @@ from blueprints.auth import auth_bp
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 's8d7f6s8d7f6s8d7f6s8d7f6!@#%GHSDFhwefhwe'
-app.config['SQLALCHEMY_DATABASE_URI'] =  'postgresql://neondb_owner:npg_08SDhaoFsubI@ep-orange-cell-ab67h29b-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://neondb_owner:npg_08SDhaoFsubI@ep-orange-cell-ab67h29b-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -105,3 +105,4 @@ if __name__ == "__main__":
         db.create_all()
         create_sample_data()
         app.run(debug=True)
+
