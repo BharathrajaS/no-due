@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard - No Due Management System{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            <i class="fas fa-chalkboard-teacher mr-2"></i>Staff Dashboard
+        </h2>
+        
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Assigned Subjects</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="subjectsGrid">
+                <!-- Subjects will be loaded here -->
+            </div>
+        </div>
+        
+        <div id="studentsSection" class="hidden">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900">Students</h3>
+                </div>
+                <button onclick="closeStudentsView()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll Number</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTable" class="bg-white divide-y divide-gray-200">
+                        <!-- Students will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Approval Modal -->
+<div id="approvalModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4" id="modalTitle">Approve Student</h3>
+        
+        <div class="mb-4">
+            <label for="remarks" class="block text-sm font-medium text-gray-700 mb-2">Remarks (Optional)</label>
+            <textarea id="remarks" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"></textarea>
+        </div>
+        
+        <div class="flex space-x-3">
+            <button onclick="submitApproval('approve')" class="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors">
+                <i class="fas fa-check mr-2"></i>Approve
+            </button>
+            <button onclick="submitApproval('reject')" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors">
+                <i class="fas fa-times mr-2"></i>Reject
+            </button>
+            <button onclick="closeModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentStudentId = null;
+let currentSubjectId = null;
+
+async function loadAssignedSubjects() {
+    try {
+        const response = await fetch('/staff/api/assigned-subjects');
+        const subjects = await response.json();
+        
+        const grid = document.getElementById('subjectsGrid');
+        grid.innerHTML = '';
+        
+        subjects.forEach(subject => {
+            const card = document.createElement('div');
+            card.className = 'bg-blue-50 p-4 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors';
+            card.onclick = () => loadStudents(subject.id, subject.class_section, subject.name);
+            
+            card.innerHTML = `
+                <h4 class="font-semibold text-blue-900">${subject.name}</h4>
+                <p class="text-sm text-blue-700">Class: ${subject.class_section}</p>
+                <p class="text-sm text-blue-700">Semester: ${subject.semester}</p>
+                <p class="text-xs text-blue-600 mt-2">Click to view students</p>
+            `;
+            
+            grid.appendChild(card);
+        });
+        
+    } catch (error) {
+        console.error('Error loading subjects:', error);
+        showAlert('Failed to load assigned subjects', 'error');
+    }
+}
+
+async function loadStudents(subjectId, classSection, subjectName) {
+    try {
+        const response = await fetch(`/staff/api/students/${subjectId}/${classSection}`);
+        const students = await response.json();
+        
+        const tbody = document.getElementById('studentsTable');
+        tbody.innerHTML = '';
+        
+        // Calculate statistics
+        let totalStudents = students.length;
+        let completedDues = 0;
+        let pendingDues = 0;
+        
+        students.forEach(student => {
+            if (student.status === 'approved') {
+                completedDues++;
+            } else if (student.status === 'pending') {
+                pendingDues++;
+            }
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${student.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.roll_number}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        student.status === 'approved' ? 'bg-green-100 text-green-800' :
+                        student.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                    }">
+                        ${student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.remarks || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button onclick="openApprovalModal(${student.id}, ${subjectId}, '${student.name}')" 
+                            class="text-primary hover:text-blue-600">
+                        <i class="fas fa-edit mr-1"></i>Update
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // Update the students section title and add statistics
+        document.getElementById('studentsSection').classList.remove('hidden');
+        document.querySelector('#studentsSection h3').innerHTML = `
+            Students - ${subjectName} (Class ${classSection})
+            <div class="grid grid-cols-3 gap-4 mt-4 mb-4">
+                <div class="bg-blue-50 p-3 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-blue-600">${totalStudents}</div>
+                    <div class="text-sm text-blue-800">Total Students</div>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-green-600">${completedDues}</div>
+                    <div class="text-sm text-green-800">Completed Dues</div>
+                </div>
+                <div class="bg-yellow-50 p-3 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-yellow-600">${pendingDues}</div>
+                    <div class="text-sm text-yellow-800">Pending Dues</div>
+                </div>
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error('Error loading students:', error);
+        showAlert('Failed to load students', 'error');
+    }
+}
+
+function openApprovalModal(studentId, subjectId, studentName) {
+    currentStudentId = studentId;
+    currentSubjectId = subjectId;
+    
+    document.getElementById('modalTitle').textContent = `Update Status - ${studentName}`;
+    document.getElementById('remarks').value = '';
+    document.getElementById('approvalModal').classList.remove('hidden');
+    document.getElementById('approvalModal').classList.add('flex');
+}
+
+function closeModal() {
+    document.getElementById('approvalModal').classList.add('hidden');
+    document.getElementById('approvalModal').classList.remove('flex');
+    currentStudentId = null;
+    currentSubjectId = null;
+}
+
+async function submitApproval(action) {
+    if (!currentStudentId || !currentSubjectId) return;
+    
+    const remarks = document.getElementById('remarks').value;
+    
+    try {
+        const response = await fetch('/staff/api/approve-student', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                student_id: currentStudentId,
+                subject_id: currentSubjectId,
+                action: action,
+                remarks: remarks
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert(result.message, 'success');
+            closeModal();
+            // Reload the current students view
+            const subjectCard = document.querySelector('.bg-blue-100');
+            if (subjectCard) {
+                subjectCard.click();
+            }
+        } else {
+            showAlert(result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('Failed to update student status', 'error');
+    }
+}
+
+function closeStudentsView() {
+    document.getElementById('studentsSection').classList.add('hidden');
+}
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    loadAssignedSubjects();
+});
+</script>
+{% endblock %}

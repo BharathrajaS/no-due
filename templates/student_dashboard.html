@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - No Due Management System{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            <i class="fas fa-user-graduate mr-2"></i>Student Dashboard
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-book text-blue-500 text-2xl mr-3"></i>
+                    <div>
+                        <p class="text-sm text-gray-600">Total Subjects</p>
+                        <p class="text-2xl font-bold text-blue-600" id="totalSubjects">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-green-50 p-4 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 text-2xl mr-3"></i>
+                    <div>
+                        <p class="text-sm text-gray-600">Approved</p>
+                        <p class="text-2xl font-bold text-green-600" id="approvedSubjects">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-yellow-50 p-4 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-clock text-yellow-500 text-2xl mr-3"></i>
+                    <div>
+                        <p class="text-sm text-gray-600">Pending</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="pendingSubjects">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Subject Status</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectsTable" class="bg-white divide-y divide-gray-200">
+                        <!-- Subjects will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="finalApprovalSection" class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Final Approval</h3>
+            <div id="finalApprovalContent">
+                <!-- Final approval content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadSubjects() {
+    try {
+        const response = await fetch('/student/api/subjects');
+        const subjects = await response.json();
+        
+        const tbody = document.getElementById('subjectsTable');
+        tbody.innerHTML = '';
+        
+        let totalSubjects = subjects.length;
+        let approvedCount = 0;
+        let pendingCount = 0;
+        
+        subjects.forEach(subject => {
+            if (subject.status === 'approved') approvedCount++;
+            else if (subject.status === 'pending') pendingCount++;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${subject.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        subject.status === 'approved' ? 'bg-green-100 text-green-800' :
+                        subject.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                    }">
+                        ${subject.status.charAt(0).toUpperCase() + subject.status.slice(1)}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${subject.remarks || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${subject.updated_at || '-'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        document.getElementById('totalSubjects').textContent = totalSubjects;
+        document.getElementById('approvedSubjects').textContent = approvedCount;
+        document.getElementById('pendingSubjects').textContent = pendingCount;
+        
+    } catch (error) {
+        console.error('Error loading subjects:', error);
+        showAlert('Failed to load subjects', 'error');
+    }
+}
+
+async function loadFinalApprovalStatus() {
+    try {
+        const response = await fetch('/student/api/final-approval-status');
+        const data = await response.json();
+        
+        const content = document.getElementById('finalApprovalContent');
+        
+        if (data.can_request) {
+            content.innerHTML = `
+                <p class="text-green-600 mb-4">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    All subjects approved! You can now request final approval.
+                </p>
+                <button onclick="requestFinalApproval()" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>Request Final Approval
+                </button>
+            `;
+        } else if (data.status) {
+            content.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Final Approval Status:</p>
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            data.status === 'approved' ? 'bg-green-100 text-green-800' :
+                            data.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
+                        }">
+                            ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}
+                        </span>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600">Updated: ${data.updated_at || '-'}</p>
+                        ${data.remarks ? `<p class="text-sm text-gray-500">Remarks: ${data.remarks}</p>` : ''}
+                    </div>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <p class="text-yellow-600">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Complete all subject approvals to request final approval.
+                </p>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Error loading final approval status:', error);
+    }
+}
+
+async function requestFinalApproval() {
+    try {
+        const response = await fetch('/student/api/request-final-approval', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert('Final approval requested successfully!', 'success');
+            loadFinalApprovalStatus();
+        } else {
+            showAlert(result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('Failed to request final approval', 'error');
+    }
+}
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    loadSubjects();
+    loadFinalApprovalStatus();
+});
+</script>
+{% endblock %}

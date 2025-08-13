@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Register - No Due Management System{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
+    <h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Register</h2>
+    
+    <form id="registerForm" class="space-y-6">
+        <div>
+            <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+            <input type="text" id="name" name="name" required 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+        </div>
+        
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" id="email" name="email" required 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+        </div>
+        
+        <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <input type="password" id="password" name="password" required 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+        </div>
+        
+        <div>
+            <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+            <select id="role" name="role" required onchange="toggleStudentFields()"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <option value="">Select Role</option>
+                <option value="student">Student</option>
+                <option value="staff">Staff</option>
+                <option value="hod">Hod</option>
+            </select>
+        </div>
+        
+        <div>
+            <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
+            <select id="department" name="department" required 
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <option value="">Select Department</option>
+                <option value="CSE">Computer Science Engineering</option>
+                <option value="ECE">Electronics & Communication</option>
+                <option value="ME">Mechanical Engineering</option>
+                <option value="CE">Civil Engineering</option>
+            </select>
+        </div>
+        
+        <div>
+            <label for="class_section" class="block text-sm font-medium text-gray-700">Class Section</label>
+            <select id="class_section" name="class_section" required 
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <option value="">Select Section</option>
+                <option value="A">Section A</option>
+                <option value="B">Section B</option>
+            </select>
+        </div>
+        
+        <div id="studentFields" class="hidden space-y-4">
+            <div>
+                <label for="year" class="block text-sm font-medium text-gray-700">Year</label>
+                <select id="year" name="year" 
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <option value="">Select Year</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
+                <select id="semester" name="semester" 
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <option value="">Select Semester</option>
+                    <option value="1">1st Semester</option>
+                    <option value="2">2nd Semester</option>
+                    <option value="3">3rd Semester</option>
+                    <option value="4">4th Semester</option>
+                    <option value="5">5th Semester</option>
+                    <option value="6">6th Semester</option>
+                    <option value="7">7th Semester</option>
+                    <option value="8">8th Semester</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="roll_number" class="block text-sm font-medium text-gray-700">Roll Number</label>
+                <input type="text" id="roll_number" name="roll_number" 
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+            </div>
+        </div>
+        
+        <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
+            <i class="fas fa-user-plus mr-2"></i>Register
+        </button>
+    </form>
+    
+    <p class="mt-4 text-center text-sm text-gray-600">
+        Already have an account? <a href="/login" class="text-primary hover:underline">Login here</a>
+    </p>
+</div>
+
+<script>
+function toggleStudentFields() {
+    const role = document.getElementById('role').value;
+    const studentFields = document.getElementById('studentFields');
+    
+    if (role === 'student') {
+        studentFields.classList.remove('hidden');
+        document.getElementById('year').required = true;
+        document.getElementById('semester').required = true;
+        document.getElementById('roll_number').required = true;
+    } else {
+        studentFields.classList.add('hidden');
+        document.getElementById('year').required = false;
+        document.getElementById('semester').required = false;
+        document.getElementById('roll_number').required = false;
+    }
+}
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        const response = await fetch('/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert('Registration successful! Please login.', 'success');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        } else {
+            showAlert(result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('Registration failed. Please try again.', 'error');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1008 @@
+{% extends "base.html" %}
+
+{% block title %}HOD Dashboard - No Due Management System{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Navigation Tabs -->
+    <div class="bg-white rounded-lg shadow-md">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8 px-6">
+                <button onclick="showTab('students')" id="studentsTab" class="tab-button active py-4 px-1 border-b-2 border-primary font-medium text-sm text-primary">
+                    <i class="fas fa-users mr-2"></i>Students
+                </button>
+                <button onclick="showTab('classes')" id="classesTab" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <i class="fas fa-school mr-2"></i>Classes
+                </button>
+                <button onclick="showTab('subjects')" id="subjectsTab" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <i class="fas fa-book mr-2"></i>Subjects
+                </button>
+                <button onclick="showTab('assignments')" id="assignmentsTab" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <i class="fas fa-tasks mr-2"></i>Assignments
+                </button>
+            </nav>
+        </div>
+        
+        <!-- Students Tab -->
+        <div id="studentsContent" class="tab-content p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-user-tie mr-2"></i>Department Students
+            </h2>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll Number</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year/Sem</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject Progress</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Final Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTable" class="bg-white divide-y divide-gray-200">
+                        <!-- Students will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Classes Tab -->
+        <div id="classesContent" class="tab-content p-6 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">
+                    <i class="fas fa-school mr-2"></i>Class Management
+                </h2>
+                <button onclick="openCreateClassModal()" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Class
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="classesGrid">
+                <!-- Classes will be loaded here -->
+            </div>
+            
+            <!-- Class Students Section -->
+            <div id="classStudentsSection" class="hidden mt-8">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900" id="classStudentsTitle">Class Students</h3>
+                    </div>
+                    <button onclick="closeClassDetailsView()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll Number</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject Progress</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Final Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes by Teachers</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classStudentsTable" class="bg-white divide-y divide-gray-200">
+                            <!-- Class students will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Class Subjects Section -->
+            <div id="classSubjectsSection" class="hidden mt-8">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900" id="classSubjectsTitle">Class Subjects</h3>
+                    </div>
+                    <button onclick="closeClassDetailsView()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject Code</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Credits</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pending</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classSubjectsTable" class="bg-white divide-y divide-gray-200">
+                            <!-- Class subjects will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Subjects Tab -->
+        <div id="subjectsContent" class="tab-content p-6 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">
+                    <i class="fas fa-book mr-2"></i>Subject Management
+                </h2>
+                <button onclick="openCreateSubjectModal()" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Subject
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject Code</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Credits</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Class</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statistics</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectsTable" class="bg-white divide-y divide-gray-200">
+                        <!-- Subjects will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Assignments Tab -->
+        <div id="assignmentsContent" class="tab-content p-6 hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-tasks mr-2"></i>Staff Assignments
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Staff List -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Staff Members</h3>
+                    <div id="staffList" class="space-y-2">
+                        <!-- Staff will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Assignment Form -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Assign Subject to Staff</h3>
+                    <form id="assignmentForm" class="space-y-4">
+                        <div>
+                            <label for="staffSelect" class="block text-sm font-medium text-gray-700">Select Staff</label>
+                            <select id="staffSelect" name="staff_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                                <option value="">Select Staff Member</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="subjectSelect" class="block text-sm font-medium text-gray-700">Select Subject</label>
+                            <select id="subjectSelect" name="subject_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                                <option value="">Select Subject</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="classSelectAssign" class="block text-sm font-medium text-gray-700">Select Class</label>
+                            <select id="classSelectAssign" name="class_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                                <option value="">Select Class</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Assign Subject
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Class Modal -->
+<div id="createClassModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Create New Class</h3>
+        
+        <form id="createClassForm" class="space-y-4">
+            <div>
+                <label for="className" class="block text-sm font-medium text-gray-700">Class Name</label>
+                <input type="text" id="className" name="name" required placeholder="e.g., CSE 1st Year Section A"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+            </div>
+            
+            <div>
+                <label for="classYear" class="block text-sm font-medium text-gray-700">Year</label>
+                <select id="classYear" name="year" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <option value="">Select Year</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="classSemester" class="block text-sm font-medium text-gray-700">Semester</label>
+                <select id="classSemester" name="semester" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <option value="">Select Semester</option>
+                    <option value="1">1st Semester</option>
+                    <option value="2">2nd Semester</option>
+                    <option value="3">3rd Semester</option>
+                    <option value="4">4th Semester</option>
+                    <option value="5">5th Semester</option>
+                    <option value="6">6th Semester</option>
+                    <option value="7">7th Semester</option>
+                    <option value="8">8th Semester</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="classSection" class="block text-sm font-medium text-gray-700">Section</label>
+                <select id="classSection" name="section" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <option value="">Select Section</option>
+                    <option value="A">Section A</option>
+                    <option value="B">Section B</option>
+                    <option value="C">Section C</option>
+                </select>
+            </div>
+            
+            <div class="flex space-x-3">
+                <button type="submit" class="flex-1 bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Class
+                </button>
+                <button type="button" onclick="closeCreateClassModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Create Subject Modal -->
+<div id="createSubjectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Create New Subject</h3>
+        
+        <form id="createSubjectForm" class="space-y-4">
+            <div>
+                <label for="subjectName" class="block text-sm font-medium text-gray-700">Subject Name</label>
+                <input type="text" id="subjectName" name="name" required placeholder="e.g., Data Structures"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+            </div>
+            
+            <div>
+                <label for="subjectCode" class="block text-sm font-medium text-gray-700">Subject Code</label>
+                <input type="text" id="subjectCode" name="code" required placeholder="e.g., CS201"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+            </div>
+            
+            <div>
+                <label for="subjectSemester" class="block text-sm font-medium text-gray-700">Semester</label>
+                <select id="subjectSemester" name="semester" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <option value="">Select Semester</option>
+                    <option value="1">1st Semester</option>
+                    <option value="2">2nd Semester</option>
+                    <option value="3">3rd Semester</option>
+                    <option value="4">4th Semester</option>
+                    <option value="5">5th Semester</option>
+                    <option value="6">6th Semester</option>
+                    <option value="7">7th Semester</option>
+                    <option value="8">8th Semester</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="subjectCredits" class="block text-sm font-medium text-gray-700">Credits</label>
+                <input type="number" id="subjectCredits" name="credits" min="1" max="6" value="3"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+            </div>
+            
+            <div>
+                <label for="subjectClass" class="block text-sm font-medium text-gray-700">Assign to Class (Optional)</label>
+                <select id="subjectClass" name="class_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <option value="">Select Class (Optional)</option>
+                </select>
+            </div>
+            
+            <div class="flex space-x-3">
+                <button type="submit" class="flex-1 bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Subject
+                </button>
+                <button type="button" onclick="closeCreateSubjectModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Class Advisor Modal -->
+<div id="classAdvisorModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4" id="advisorModalTitle">Assign Class Advisor</h3>
+        
+        <form id="classAdvisorForm" class="space-y-4">
+            <div>
+                <label for="advisorSelect" class="block text-sm font-medium text-gray-700">Select Staff Member</label>
+                <select id="advisorSelect" name="staff_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <option value="">Select Staff Member</option>
+                </select>
+            </div>
+            
+            <div class="flex space-x-3">
+                <button type="submit" class="flex-1 bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-user-check mr-2"></i>Assign Advisor
+                </button>
+                <button type="button" onclick="closeClassAdvisorModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Final Approval Modal -->
+<div id="finalApprovalModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4" id="finalModalTitle">Final Approval</h3>
+        
+        <div class="mb-4">
+            <label for="finalRemarks" class="block text-sm font-medium text-gray-700 mb-2">Remarks (Optional)</label>
+            <textarea id="finalRemarks" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"></textarea>
+        </div>
+        
+        <div class="flex space-x-3">
+            <button onclick="submitFinalApproval('approve')" class="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors">
+                <i class="fas fa-check mr-2"></i>Approve
+            </button>
+            <button onclick="submitFinalApproval('reject')" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors">
+                <i class="fas fa-times mr-2"></i>Reject
+            </button>
+            <button onclick="closeFinalModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentFinalStudentId = null;
+let currentClassId = null;
+
+function showTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active', 'border-primary', 'text-primary');
+        button.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Show selected tab content
+    document.getElementById(tabName + 'Content').classList.remove('hidden');
+    
+    // Add active class to selected tab
+    const activeTab = document.getElementById(tabName + 'Tab');
+    activeTab.classList.add('active', 'border-primary', 'text-primary');
+    activeTab.classList.remove('border-transparent', 'text-gray-500');
+    
+    // Hide class details sections when switching tabs
+    if (tabName !== 'classes') {
+        document.getElementById('classStudentsSection').classList.add('hidden');
+        document.getElementById('classSubjectsSection').classList.add('hidden');
+    }
+    
+    // Load data based on tab
+    if (tabName === 'students') {
+        loadDepartmentStudents();
+    } else if (tabName === 'classes') {
+        loadClasses();
+    } else if (tabName === 'subjects') {
+        loadSubjects();
+    } else if (tabName === 'assignments') {
+        loadStaffAndSubjects();
+    }
+}
+
+async function loadDepartmentStudents() {
+    try {
+        const response = await fetch('/hod/api/department-students');
+        const students = await response.json();
+        
+        const tbody = document.getElementById('studentsTable');
+        tbody.innerHTML = '';
+        
+        students.forEach(student => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${student.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.roll_number}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.class_section}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.year}/${student.semester}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex items-center">
+                        <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: ${(student.approved_subjects / student.total_subjects) * 100}%"></div>
+                        </div>
+                        <span class="text-xs">${student.approved_subjects}/${student.total_subjects}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        student.final_status === 'approved' ? 'bg-green-100 text-green-800' :
+                        student.final_status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        student.final_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                    }">
+                        ${student.final_status === 'not_requested' ? 'Not Requested' : 
+                          student.final_status.charAt(0).toUpperCase() + student.final_status.slice(1)}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    ${student.final_status === 'pending' ? 
+                        `<button onclick="openFinalApprovalModal(${student.id}, '${student.name}')" 
+                                class="text-primary hover:text-blue-600">
+                            <i class="fas fa-gavel mr-1"></i>Review
+                        </button>` : 
+                        '<span class="text-gray-400">-</span>'
+                    }
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+    } catch (error) {
+        console.error('Error loading students:', error);
+        showAlert('Failed to load department students', 'error');
+    }
+}
+
+async function loadClasses() {
+    try {
+        const response = await fetch('/hod/api/classes');
+        const classes = await response.json();
+        
+        const grid = document.getElementById('classesGrid');
+        grid.innerHTML = '';
+        
+        classes.forEach(cls => {
+            const card = document.createElement('div');
+            card.className = 'bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow';
+            
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">${cls.name}</h3>
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${cls.section}</span>
+                </div>
+                
+                <div class="space-y-2 text-sm text-gray-600 mb-4">
+                    <p><i class="fas fa-calendar mr-2"></i>Year ${cls.year}, Semester ${cls.semester}</p>
+                    <p><i class="fas fa-user-tie mr-2"></i>Advisor: ${cls.advisor_name}</p>
+                </div>
+                
+                <!-- Class Statistics -->
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <div class="bg-blue-50 p-2 rounded text-center cursor-pointer hover:bg-blue-100 transition-colors" 
+                         onclick="loadClassStudents(${cls.id}, '${cls.name}', ${cls.year}, ${cls.semester}, '${cls.section}')">
+                        <div class="text-lg font-bold text-blue-600" id="totalStudents-${cls.id}">-</div>
+                        <div class="text-xs text-blue-800">Total Students</div>
+                    </div>
+                    <div class="bg-green-50 p-2 rounded text-center">
+                        <div class="text-lg font-bold text-green-600" id="completedDues-${cls.id}">-</div>
+                        <div class="text-xs text-green-800">Completed</div>
+                    </div>
+                    <div class="bg-purple-50 p-2 rounded text-center cursor-pointer hover:bg-purple-100 transition-colors"
+                         onclick="loadClassSubjects(${cls.id}, '${cls.name}', ${cls.year}, ${cls.semester}, '${cls.section}')">
+                        <div class="text-lg font-bold text-purple-600" id="subjectCount-${cls.id}">-</div>
+                        <div class="text-xs text-purple-800">Subjects in Class</div>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2">
+                    <button onclick="openClassAdvisorModal(${cls.id}, '${cls.name}')" 
+                            class="flex-1 bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors text-sm">
+                        <i class="fas fa-user-check mr-2"></i>
+                        ${cls.advisor_id ? 'Change Advisor' : 'Assign Advisor'}
+                    </button>
+                </div>
+            `;
+            
+            grid.appendChild(card);
+            
+            // Load statistics for this class
+            loadClassStatistics(cls.id, cls.year, cls.semester, cls.section);
+        });
+        
+    } catch (error) {
+        console.error('Error loading classes:', error);
+        showAlert('Failed to load classes', 'error');
+    }
+}
+
+async function loadClassStudents(classId, className, year, semester, section) {
+    try {
+        const response = await fetch(`/hod/api/class-students/${classId}`);
+        const students = await response.json();
+        
+        const tbody = document.getElementById('classStudentsTable');
+        tbody.innerHTML = '';
+        
+        students.forEach(student => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${student.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.roll_number}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex items-center">
+                        <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: ${(student.approved_subjects / student.total_subjects) * 100}%"></div>
+                        </div>
+                        <span class="text-xs">${student.approved_subjects}/${student.total_subjects}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        student.final_status === 'approved' ? 'bg-green-100 text-green-800' :
+                        student.final_status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        student.final_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                    }">
+                        ${student.final_status === 'not_requested' ? 'Not Requested' : 
+                          student.final_status.charAt(0).toUpperCase() + student.final_status.slice(1)}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500">
+                    <div class="max-w-xs">
+                        ${student.teacher_notes && student.teacher_notes.length > 0 ? 
+                            student.teacher_notes.map(note => 
+                                `<div class="mb-1 p-2 bg-gray-50 rounded text-xs">
+                                    <strong>${note.subject}:</strong> ${note.remarks || 'No remarks'}
+                                    ${note.teacher_name ? `<br><em>- ${note.teacher_name}</em>` : ''}
+                                </div>`
+                            ).join('') : 
+                            '<span class="text-gray-400">No notes</span>'
+                        }
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // Update the title
+        document.getElementById('classStudentsTitle').textContent = `Students - ${className}`;
+        
+        // Hide subjects section and show students section
+        document.getElementById('classSubjectsSection').classList.add('hidden');
+        document.getElementById('classStudentsSection').classList.remove('hidden');
+        
+    } catch (error) {
+        console.error('Error loading class students:', error);
+        showAlert('Failed to load class students', 'error');
+    }
+}
+
+async function loadClassSubjects(classId, className, year, semester, section) {
+    try {
+        const response = await fetch(`/hod/api/class-subjects/${classId}/${semester}`);
+        const subjects = await response.json();
+        
+        const tbody = document.getElementById('classSubjectsTable');
+        tbody.innerHTML = '';
+        
+        subjects.forEach(subject => {
+            const totalStudents = subject.completed + subject.pending;
+            const progressPercentage = totalStudents > 0 ? (subject.completed / totalStudents) * 100 : 0;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${subject.code}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${subject.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${subject.credits}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-semibold">
+                        ${subject.completed}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-semibold">
+                        ${subject.pending}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex items-center">
+                        <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: ${progressPercentage}%"></div>
+                        </div>
+                        <span class="text-xs">${Math.round(progressPercentage)}%</span>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // Update the title
+        document.getElementById('classSubjectsTitle').textContent = `Subjects - ${className}`;
+        
+        // Hide students section and show subjects section
+        document.getElementById('classStudentsSection').classList.add('hidden');
+        document.getElementById('classSubjectsSection').classList.remove('hidden');
+        
+    } catch (error) {
+        console.error('Error loading class subjects:', error);
+        showAlert('Failed to load class subjects', 'error');
+    }
+}
+
+function closeClassDetailsView() {
+    document.getElementById('classStudentsSection').classList.add('hidden');
+    document.getElementById('classSubjectsSection').classList.add('hidden');
+}
+
+async function loadClassStatistics(classId, year, semester, section) {
+    try {
+        const response = await fetch(`/hod/api/class-statistics/${classId}`);
+        const stats = await response.json();
+        
+        document.getElementById(`totalStudents-${classId}`).textContent = stats.total_students;
+        document.getElementById(`completedDues-${classId}`).textContent = stats.completed_dues;
+        
+        // Load subject count
+        const subjectResponse = await fetch(`/hod/api/class-subject-count/${classId}/${semester}`);
+        const subjectData = await subjectResponse.json();
+        document.getElementById(`subjectCount-${classId}`).textContent = subjectData.subject_count;
+        
+    } catch (error) {
+        console.error('Error loading class statistics:', error);
+    }
+}
+
+async function loadSubjects() {
+    try {
+        const response = await fetch('/hod/api/subjects');
+        const subjects = await response.json();
+        
+        const tbody = document.getElementById('subjectsTable');
+        tbody.innerHTML = '';
+        
+        subjects.forEach(subject => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${subject.code}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${subject.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${subject.semester}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${subject.credits}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${subject.class_name}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex space-x-2">
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded" id="subjectCompleted-${subject.id}">-</span>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded" id="subjectPending-${subject.id}">-</span>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+            
+            // Load statistics for this subject
+            loadSubjectStatistics(subject.id);
+        });
+        
+    } catch (error) {
+        console.error('Error loading subjects:', error);
+        showAlert('Failed to load subjects', 'error');
+    }
+}
+
+async function loadSubjectStatistics(subjectId) {
+    try {
+        const response = await fetch(`/hod/api/subject-statistics/${subjectId}`);
+        const stats = await response.json();
+        
+        document.getElementById(`subjectCompleted-${subjectId}`).textContent = `${stats.completed} Completed`;
+        document.getElementById(`subjectPending-${subjectId}`).textContent = `${stats.pending} Pending`;
+        
+    } catch (error) {
+        console.error('Error loading subject statistics:', error);
+    }
+}
+
+async function loadStaffAndSubjects() {
+    try {
+        // Load staff
+        const staffResponse = await fetch('/hod/api/staff');
+        const staff = await staffResponse.json();
+        
+        const staffList = document.getElementById('staffList');
+        const staffSelect = document.getElementById('staffSelect');
+        const advisorSelect = document.getElementById('advisorSelect');
+        
+        staffList.innerHTML = '';
+        staffSelect.innerHTML = '<option value="">Select Staff Member</option>';
+        advisorSelect.innerHTML = '<option value="">Select Staff Member</option>';
+        
+        staff.forEach(member => {
+            // Add to staff list
+            const staffCard = document.createElement('div');
+            staffCard.className = 'bg-white p-3 rounded border';
+            staffCard.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="font-medium">${member.name}</p>
+                        <p class="text-sm text-gray-500">${member.email}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded block mb-1">${member.assignments} subjects</span>
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${member.advised_classes} classes</span>
+                    </div>
+                </div>
+            `;
+            staffList.appendChild(staffCard);
+            
+            // Add to select dropdowns
+            const option1 = document.createElement('option');
+            option1.value = member.id;
+            option1.textContent = member.name;
+            staffSelect.appendChild(option1);
+            
+            const option2 = document.createElement('option');
+            option2.value = member.id;
+            option2.textContent = member.name;
+            advisorSelect.appendChild(option2);
+        });
+        
+        // Load subjects
+        const subjectsResponse = await fetch('/hod/api/subjects');
+        const subjects = await subjectsResponse.json();
+        
+        const subjectSelect = document.getElementById('subjectSelect');
+        const subjectClass = document.getElementById('subjectClass');
+        
+        subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+        subjectClass.innerHTML = '<option value="">Select Class (Optional)</option>';
+        
+        subjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.id;
+            option.textContent = `${subject.code} - ${subject.name}`;
+            subjectSelect.appendChild(option);
+        });
+        
+        // Load classes
+        const classesResponse = await fetch('/hod/api/classes');
+        const classes = await classesResponse.json();
+        
+        const classSelectAssign = document.getElementById('classSelectAssign');
+        classSelectAssign.innerHTML = '<option value="">Select Class</option>';
+        
+        classes.forEach(cls => {
+            const option1 = document.createElement('option');
+            option1.value = cls.id;
+            option1.textContent = cls.name;
+            classSelectAssign.appendChild(option1);
+            
+            const option2 = document.createElement('option');
+            option2.value = cls.id;
+            option2.textContent = cls.name;
+            subjectClass.appendChild(option2);
+        });
+        
+    } catch (error) {
+        console.error('Error loading staff and subjects:', error);
+        showAlert('Failed to load staff and subjects', 'error');
+    }
+}
+
+// Modal functions
+function openCreateClassModal() {
+    document.getElementById('createClassModal').classList.remove('hidden');
+    document.getElementById('createClassModal').classList.add('flex');
+}
+
+function closeCreateClassModal() {
+    document.getElementById('createClassModal').classList.add('hidden');
+    document.getElementById('createClassModal').classList.remove('flex');
+    document.getElementById('createClassForm').reset();
+}
+
+function openCreateSubjectModal() {
+    loadStaffAndSubjects(); // Load classes for the dropdown
+    document.getElementById('createSubjectModal').classList.remove('hidden');
+    document.getElementById('createSubjectModal').classList.add('flex');
+}
+
+function closeCreateSubjectModal() {
+    document.getElementById('createSubjectModal').classList.add('hidden');
+    document.getElementById('createSubjectModal').classList.remove('flex');
+    document.getElementById('createSubjectForm').reset();
+}
+
+function openClassAdvisorModal(classId, className) {
+    currentClassId = classId;
+    document.getElementById('advisorModalTitle').textContent = `Assign Advisor - ${className}`;
+    document.getElementById('classAdvisorModal').classList.remove('hidden');
+    document.getElementById('classAdvisorModal').classList.add('flex');
+}
+
+function closeClassAdvisorModal() {
+    document.getElementById('classAdvisorModal').classList.add('hidden');
+    document.getElementById('classAdvisorModal').classList.remove('flex');
+    currentClassId = null;
+}
+
+function openFinalApprovalModal(studentId, studentName) {
+    currentFinalStudentId = studentId;
+    document.getElementById('finalModalTitle').textContent = `Final Approval - ${studentName}`;
+    document.getElementById('finalRemarks').value = '';
+    document.getElementById('finalApprovalModal').classList.remove('hidden');
+    document.getElementById('finalApprovalModal').classList.add('flex');
+}
+
+function closeFinalModal() {
+    document.getElementById('finalApprovalModal').classList.add('hidden');
+    document.getElementById('finalApprovalModal').classList.remove('flex');
+    currentFinalStudentId = null;
+}
+
+async function submitFinalApproval(action) {
+    if (!currentFinalStudentId) return;
+    
+    const remarks = document.getElementById('finalRemarks').value;
+    
+    try {
+        const response = await fetch('/hod/api/final-approve', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                student_id: currentFinalStudentId,
+                action: action,
+                remarks: remarks
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert(result.message, 'success');
+            closeFinalModal();
+            loadDepartmentStudents();
+        } else {
+            showAlert(result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('Failed to process final approval', 'error');
+    }
+}
+
+// Form submissions
+document.getElementById('createClassForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        const response = await fetch('/hod/api/create-class', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert(result.message, 'success');
+            closeCreateClassModal();
+            loadClasses();
+        } else {
+            showAlert(result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('Failed to create class', 'error');
+    }
+});
+
+document.getElementById('createSubjectForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        const response = await fetch('/hod/api/create-subject', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert(result.message, 'success');
+            closeCreateSubjectModal();
+            loadSubjects();
+        } else {
+            showAlert(result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('Failed to create subject', 'error');
+    }
+});
+
+document.getElementById('classAdvisorForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    data.class_id = currentClassId;
+    
+    try {
+        const response = await fetch('/hod/api/assign-class-advisor', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert(result.message, 'success');
+            closeClassAdvisorModal();
+            loadClasses();
+        } else {
+            showAlert(result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('Failed to assign class advisor', 'error');
+    }
+});
+
+document.getElementById('assignmentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        const response = await fetch('/hod/api/assign-subject', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert(result.message, 'success');
+            e.target.reset();
+            loadStaffAndSubjects();
+        } else {
+            showAlert(result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('Failed to assign subject', 'error');
+    }
+});
+
+// Load initial data
+document.addEventListener('DOMContentLoaded', () => {
+    showTab('students');
+});
+</script>
+{% endblock %}
